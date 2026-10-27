@@ -36,3 +36,7 @@ Keep the diff small, so each merge stays cheap:
 | Upstream file | Ticket | Why |
 | ------------- | ------ | --- |
 | `README.md`   | —      | Presents Andvari instead of Bitwarden. |
+| `.claude/settings.json` | — | SaaSFoundryAI harness hooks and read-only permissions; drops Bitwarden's attribution override and its internal plugin marketplace. |
+| `.gitignore`  | —      | SaaSFoundryAI harness: ignores `.env` files. |
+
+Files Andvari adds (not upstream): `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.saasfoundry.json`, `.agents/`, `.claude/docs/`, `.claude/skills/sf-*`, `.github/workflows/pr-review-sync.yml`, `UPSTREAM.md`, `docs/SPEC.md`.

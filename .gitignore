@@ -67,3 +67,7 @@ apps/**/config/local.json
 .debug/**
 !.debug/**/
 !.debug/**/.gitkeep
+
+.env
+.env.local
+.env*.local
