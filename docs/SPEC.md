@@ -1,14 +1,33 @@
-# Andvari — Specification v0.1
+# Andvari — Specification v0.2
 
-Date: 2026-10-26 · Status: draft
+Date: 2026-10-27 · Status: draft
+
+Andvari is a password manager bound to a hardware key: a soft fork of the Bitwarden clients with its own look, plus sessions tied to the key's presence. The SRS (Notion) becomes the reference once the SaaSFoundryAI harness is installed; this file is the founding brief.
 
 ## 1. Problem
 
-Web sessions live in browser cookies and storage. They survive as long as the browser keeps them, whether or not the owner is at the computer. A hardware key (YubiKey) proves presence at sign-in, then plays no further part.
+1. **Looks.** Bitwarden is solid and free, but its interface is unpleasant to use every day.
+2. **Sessions outlive their owner.** Web sessions live in browser cookies and storage. They survive as long as the browser keeps them, whether or not the owner is at the computer. A hardware key (YubiKey) proves presence at sign-in, then plays no further part.
 
-Andvari makes the key's presence a condition for *using* a protected session, without forcing a new sign-in every time the key is unplugged.
+## 2. Product
 
-## 2. Target behaviour
+| Part | What it is |
+| ---- | ---------- |
+| **Password manager** | The Bitwarden browser extension, rebranded and re-themed, talking to a Bitwarden-compatible server (bitwarden.com or a self-hosted Vaultwarden). Vault, sync, encryption and autofill stay Bitwarden's code. |
+| **Key tether** | A module of the same extension, plus a small local helper, that makes the key's presence a condition for *using* a protected session (§4). |
+
+## 3. Fork rules
+
+- **GPL variant only.** Nothing from `bitwarden_license/`, never `@bitwarden/commercial-sdk-internal`. Bitwarden's own CI already builds this variant.
+- **Complete rebrand.** Name, logo, icons, store links; Bitwarden's trademark guidelines forbid the name and its variants and protect the trade dress.
+- **Small diff.** Theme in an added override stylesheet (tokens: `libs/components/src/tw-theme.css`, `tailwind.config.base.js`), "Bitwarden" replaced in the locales at build time rather than in 64 locale files, the tether in added files with a few hooks. Every changed upstream file is ledgered in `UPSTREAM.md`.
+- **Every upstream release is merged**, patch releases included: Bitwarden ships security fixes unannounced (see `UPSTREAM.md`).
+- **Browser extension first.** The desktop app is not forked in v0: its native-messaging biometric unlock only accepts Bitwarden's official extension IDs, so Andvari has no biometric unlock through it.
+- Also themed: the autofill UI injected into pages (`apps/browser/src/autofill/content/components/constants/styles.ts`, its own palette) and the deprecated `popup/scss/variables.scss`.
+
+## 4. Key tether
+
+### Target behaviour
 
 | # | Situation | Result |
 |---|---|---|
@@ -23,45 +42,26 @@ Andvari makes the key's presence a condition for *using* a protected session, wi
 - activating one of its tabs (tab switch, window focus);
 - a click, key press or form submission in one of its pages.
 
-## 3. Scope
-
-### v0 (prototype)
-- macOS, Google Chrome (Chromium-based browsers should follow for free).
-- Allow-list of keys by serial number.
-- Protected sites configured by the user (domains, e.g. `github.com`, `google.com`).
-- B1–B5.
-
-### Later
-- Linux.
-- Firefox.
-- Strong key check: challenge-response (HMAC-SHA1, slot 2) instead of the serial number (see §6).
-- Optional actions on removal: lock the screen, lock the password manager.
-
-### Non-goals
-- Not a password manager. Credentials stay in an existing, audited manager (see §8).
-- No stored YubiKey PIN, no PIN typed on the user's behalf.
-- No server, no account, no telemetry.
-
-## 4. Architecture
+### Architecture
 
 ```
-┌──────────────┐  native messaging  ┌──────────────────────┐
-│ Chrome ext.  │◄──────────────────►│ andvari-host       │
-│ (MV3)        │  presence events   │ (local process)      │
-└──────┬───────┘                    └──────────┬───────────┘
-       │ cookies, storage,                     │ USB hotplug,
-       │ request blocking                      │ key identity
-       ▼                                       ▼
-   Protected sites                          YubiKey(s)
+┌──────────────────┐  native messaging  ┌──────────────────────┐
+│ Andvari ext.     │◄──────────────────►│ andvari-host         │
+│ (tether module)  │  presence events   │ (local process)      │
+└──────┬───────────┘                    └──────────┬───────────┘
+       │ cookies, storage,                         │ USB hotplug,
+       │ request blocking                          │ key identity
+       ▼                                           ▼
+   Protected sites                              YubiKey(s)
 ```
 
-### 4.1 Host (`andvari-host`)
-- Started by Chrome through native messaging (`connectNative`), one long-lived port. An open port also keeps the extension's service worker alive.
+**Host (`andvari-host`).**
+- Started by the browser through native messaging (`connectNative`), one long-lived port. An open port also keeps the extension's service worker alive.
 - Watches USB hotplug (IOKit on macOS, udev on Linux later) for Yubico devices (vendor ID `0x1050`).
 - On every change, identifies the connected keys and pushes `{"present": true|false, "serial": ...}` to the extension.
-- Language: Go (one code base for macOS and Linux, matches the other DiamondForge projects).
+- Language: Go (one code base for macOS and Linux).
 
-### 4.2 Extension
+**Tether module (in the extension).**
 - Holds the presence state pushed by the host, in `chrome.storage.session`, so content scripts read it synchronously.
 - **Key absent:**
   - installs a `declarativeNetRequest` dynamic rule that blocks non-navigation requests (`xmlhttprequest`, `websocket`, `ping`…) to protected domains (B3);
@@ -69,12 +69,11 @@ Andvari makes the key's presence a condition for *using* a protected session, wi
   - `webNavigation.onBeforeNavigate` and `tabs.onActivated` on a protected site trigger the wipe (B2).
 - **Wipe:** `chrome.browsingData.remove` with `origins` set to the site's origins: cookies, localStorage, IndexedDB, Cache Storage, service workers. Then every tab of that site is sent to an extension page "Key absent — session closed".
 - **Key present:** the blocking rule is removed. Nothing else changes (B1).
+- Optional (later): lock the vault when the key is removed.
 
-### 4.3 Configuration
-- Edited in the extension's options page: protected domains, allowed key serials.
-- A domain covers its subdomains (`google.com` → `accounts.google.com`, `mail.google.com`).
+**Configuration.** In the extension's settings: protected domains, allowed key serials. A domain covers its subdomains (`google.com` → `accounts.google.com`, `mail.google.com`).
 
-## 5. Failure modes
+### Failure modes
 
 | Case | Behaviour | Why |
 |---|---|---|
@@ -83,39 +82,26 @@ Andvari makes the key's presence a condition for *using* a protected session, wi
 | Key removed during a user action in flight | The action may complete; the next one triggers the wipe. | Content scripts cannot undo an action already dispatched. |
 | Site keeps auth outside the cleared storage (e.g. a desktop app, another browser) | Not covered. | Documented limitation. |
 
-## 6. Key identity
+### Key identity
 
 - **v0, serial number.** Read through the USB descriptors / `ykman list --serials`. Easy, but a malicious USB device could pretend to have the same serial.
 - **Later, challenge-response.** Slot 2 of the YubiKey's OTP application is programmed with an HMAC-SHA1 secret (free on both keys; slot 1 keeps Yubico OTP). The host sends a random challenge on plug-in and checks the answer. Option: require a touch for that check, once per plug-in.
 - Both keys (main and backup) are on the allow-list.
 
-## 7. Security notes
+## 5. Security notes
 
-- The extension needs `cookies`, `browsingData`, `declarativeNetRequest`, `webNavigation`, `tabs`, `nativeMessaging`, `storage` and host permissions on the protected domains only, never `<all_urls>`.
-- The host only answers its own extension ID (`allowed_origins` in the native messaging manifest).
-- No secret is stored by Andvari in v0.
+- The tether adds the permissions `cookies`, `browsingData`, `declarativeNetRequest`, `webNavigation` and `nativeMessaging`; its host permissions cover the protected domains only.
+- The host only answers Andvari's extension ID (`allowed_origins` in the native messaging manifest).
+- The tether stores no secret in v0. No YubiKey PIN is stored or typed on the user's behalf.
 - Andvari complements, and does not replace: macOS smart-card login with "lock on key removal", and the key as sign-in factor on each site.
 
-## 8. Password manager (decision record)
+## 6. Decisions
 
-Question: build our own YubiKey-bound password manager?
+- **Fork Bitwarden rather than write a password manager (2026-10-27).** The vault is the highest-value target on the machine; encryption is the easy part, autofill the hard one (DOM-based extension clickjacking, DEF CON 33, 2025: 10 of 11 manager extensions vulnerable), and sync, mobile, recovery and audits are projects of their own. Exploration: theme-level reskin ≈ 6–8 files, theme + rebrand ≈ 15–20 files plus ~50 images; ~23 browser releases a year, 1–2 h of merge each.
+- **Not a third-party client (Keyguard-style).** A client re-implements the security-critical part (key derivation, decryption, autofill); a soft fork keeps Bitwarden's.
 
-Decision: **no, use an existing one.** Andvari may later lock it on key removal.
+## 7. Open questions
 
-Reasons:
-- The vault is the highest-value target on the machine. Encryption itself is the easy part; autofill is the hard part: the DOM-based clickjacking attacks shown at DEF CON 33 (2025) hit 10 of 11 tested manager extensions, audited ones included.
-- Sync across devices, mobile apps, recovery when a key is lost, and independent audits are each a project of their own.
-
-Candidates (free, YubiKey/FIDO2 as second factor):
-- **Proton Pass**: free plan with unlimited logins and devices, passkeys; cleaner UI than Bitwarden; the Proton account accepts FIDO2 security keys.
-- **Bitwarden**: FIDO2 two-step login free on all plans (up to 5 keys).
-- **KeePassXC**: free and open source, local file, YubiKey challenge-response unlock; dated UI.
-- **Apple Passwords**: free, native, good UI; Apple ecosystem only (and Chrome on Windows through iCloud).
-
-Possible later middle ground: a better-looking client on an existing audited format/back end (KDBX file, or a Bitwarden-compatible server). Same autofill risk, so only if a real need remains.
-
-## 9. Open questions
-
-1. Name: "Andvari", the Norse dwarf who guarded a hoard and cursed the ring taken from him (a session taken without the key is worthless to its taker). Checked on 2026-10-26: an iPhone document scanner ships as Andvari (andvari.app), a few small GitHub repositories and the `andvari` npm package use it, Andvari Capital AS is a Norwegian investment firm; no security product or trademark found in web searches. Check EUIPO and INPI before any public release.
-2. Repository: personal account or DiamondForgeFr; public or private.
-3. Should the wipe also sign out of the site server-side (call its logout URL) when known, so a stolen cookie copy dies too?
+1. **Bitwarden's terms of service** say nothing about third-party or modified clients, but §C.3 forbids "access to the Service without Bitwarden's express written permission". Third-party clients have existed for years without known action. Before a store release: support a self-hosted Vaultwarden server, or ask Bitwarden.
+2. Should the wipe also sign out of the site server-side (call its logout URL) when known, so a stolen cookie copy dies too?
+3. Name: "Andvari", the Norse dwarf who guarded a hoard and cursed the ring taken from him. Checked on 2026-10-26: an iPhone document scanner ships as Andvari (andvari.app), a few small GitHub repositories and the `andvari` npm package use it, Andvari Capital AS is a Norwegian investment firm; no security product or trademark found in web searches. Check EUIPO and INPI before any public release.
