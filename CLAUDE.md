@@ -109,3 +109,10 @@ Use the `sf-workflow` skill CLI to check your current status and next steps:
 ## Development Commands
 
 Document this project's build, test, and lint commands here so the AI can validate its changes — SaaSFoundryAI does not manage this project's technical stack.
+
+- Install: `npm ci` at the root (Node 24, `.nvmrc`).
+- Build the extension: `scripts/andvari/build-chrome.sh` → `apps/browser/build/` (load unpacked) and `dist/andvari-chrome-<version>.zip`. About 2 minutes. Never use the `build:bit:*` scripts (commercial variant).
+- Extension ID: `jgflelfpihgmbkohcljopigcolmlgmle`, pinned by the `key` in `apps/browser/andvari/manifest-overrides.json` (`node scripts/andvari/extension-id.js` recomputes it). The private key lives in `~/.config/andvari/extension-key.pem`, never in the repository.
+- Andvari tests: `npx jest -c apps/browser/jest.config.js apps/browser/andvari --coverage=false`.
+- Before a pull request: `npm run lint`, `npm run test:types`, the tests of the touched projects (see `.claude/CLAUDE.md`, "Verifying Changes").
+- Check the extension loads: Chrome for Testing from Playwright's cache (`~/Library/Caches/ms-playwright/chromium-*`) with `--headless=new --load-extension=apps/browser/build`; the developer's browsers are Arc and Brave (no Google Chrome on this machine).

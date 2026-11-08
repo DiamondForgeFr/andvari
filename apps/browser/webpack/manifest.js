@@ -26,6 +26,8 @@ function transform(browser) {
 
     manifest = transformPrefixes(manifest, browser);
     manifest = transformChannel(manifest);
+    // ANDVARI-PATCH #6: apply Andvari's manifest overrides (extension key, identity).
+    manifest = applyOverrides(manifest, require("../andvari/manifest-overrides.json"));
 
     return JSON.stringify(manifest, null, 2);
   };

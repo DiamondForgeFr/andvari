@@ -9,9 +9,9 @@ Andvari is a soft fork of [bitwarden/clients](https://github.com/bitwarden/clien
 
 ## Merged releases
 
-| Bitwarden release    | Date       | Merged in                        |
-| -------------------- | ---------- | -------------------------------- |
-| `browser-v2026.10.0` | 2026-10-15 | initial import (2026-10-27)      |
+| Bitwarden release    | Date       | Merged in                   |
+| -------------------- | ---------- | --------------------------- |
+| `browser-v2026.10.0` | 2026-10-15 | initial import (2026-10-27) |
 
 ## Following Bitwarden
 
@@ -33,10 +33,11 @@ Keep the diff small, so each merge stays cheap:
 
 ## Ledger
 
-| Upstream file | Ticket | Why |
-| ------------- | ------ | --- |
-| `README.md`   | —      | Presents Andvari instead of Bitwarden. |
-| `.claude/settings.json` | — | SaaSFoundryAI harness hooks and read-only permissions; drops Bitwarden's attribution override and its internal plugin marketplace. |
-| `.gitignore`  | —      | SaaSFoundryAI harness: ignores `.env` files. |
+| Upstream file                      | Ticket | Why                                                                                                                                |
+| ---------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `README.md`                        | —      | Presents Andvari instead of Bitwarden.                                                                                             |
+| `.claude/settings.json`            | —      | SaaSFoundryAI harness hooks and read-only permissions; drops Bitwarden's attribution override and its internal plugin marketplace. |
+| `.gitignore`                       | —      | SaaSFoundryAI harness: ignores `.env` files.                                                                                       |
+| `apps/browser/webpack/manifest.js` | #6     | Applies `apps/browser/andvari/manifest-overrides.json` to every build (extension key, identity).                                   |
 
-Files Andvari adds (not upstream): `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.saasfoundry.json`, `.agents/`, `.claude/docs/`, `.claude/skills/sf-*`, `.github/workflows/pr-review-sync.yml`, `UPSTREAM.md`, `docs/SPEC.md`.
+Files Andvari adds (not upstream): `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.saasfoundry.json`, `.agents/`, `.claude/docs/`, `.claude/skills/sf-*`, `.github/workflows/pr-review-sync.yml`, `UPSTREAM.md`, `docs/SPEC.md`, `apps/browser/andvari/`, `scripts/andvari/`.
