@@ -33,11 +33,13 @@ Keep the diff small, so each merge stays cheap:
 
 ## Ledger
 
-| Upstream file                      | Ticket | Why                                                                                                                                |
-| ---------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `README.md`                        | —      | Presents Andvari instead of Bitwarden.                                                                                             |
-| `.claude/settings.json`            | —      | SaaSFoundryAI harness hooks and read-only permissions; drops Bitwarden's attribution override and its internal plugin marketplace. |
-| `.gitignore`                       | —      | SaaSFoundryAI harness: ignores `.env` files.                                                                                       |
-| `apps/browser/webpack/manifest.js` | #6     | Applies `apps/browser/andvari/manifest-overrides.json` to every build (extension key, identity).                                   |
+| Upstream file                                                                    | Ticket | Why                                                                                                                                |
+| -------------------------------------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `README.md`                                                                      | —      | Presents Andvari instead of Bitwarden.                                                                                             |
+| `.claude/settings.json`                                                          | —      | SaaSFoundryAI harness hooks and read-only permissions; drops Bitwarden's attribution override and its internal plugin marketplace. |
+| `.gitignore`                                                                     | —      | SaaSFoundryAI harness: ignores `.env` files.                                                                                       |
+| `apps/browser/webpack/manifest.js`                                               | #6     | Applies `apps/browser/andvari/manifest-overrides.json` to every build (extension key, identity).                                   |
+| `apps/browser/webpack.base.js`                                                   | #3     | Adds `apps/browser/andvari/brand-webpack.js`: Andvari's icons over Bitwarden's, and its logo and shield modules in their place.    |
+| `apps/browser/src/tools/popup/settings/about-dialog/about-dialog.component.html` | #3     | The Andvari mark instead of the `bwi-shield` glyph.                                                                                |
 
 Files Andvari adds (not upstream): `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.saasfoundry.json`, `.agents/`, `.claude/docs/`, `.claude/skills/sf-*`, `.github/workflows/pr-review-sync.yml`, `UPSTREAM.md`, `docs/SPEC.md`, `apps/browser/andvari/`, `scripts/andvari/`.
