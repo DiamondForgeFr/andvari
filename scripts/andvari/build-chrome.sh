@@ -21,6 +21,9 @@ if grep -rIl --exclude='*.map' -e 'bitwarden_license' -e 'commercial-sdk-interna
   exit 1
 fi
 
+# Andvari's icons and logos only (FR-BRAND-02).
+node "$ROOT/scripts/andvari/check-brand.js" "$BUILD"
+
 VERSION="$(node -p "require('$BUILD/manifest.json').version")"
 EXTENSION_ID="$(node "$ROOT/scripts/andvari/extension-id.js" "$BUILD/manifest.json")"
 

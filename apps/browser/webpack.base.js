@@ -232,6 +232,8 @@ module.exports.buildConfig = function buildConfig(params) {
         { from: path.resolve(__dirname, "src/autofill/content/autofill.css"), to: "content" },
       ],
     }),
+    // ANDVARI-PATCH #3: Andvari's icons and logos replace Bitwarden's (apps/browser/andvari/brand-webpack.js).
+    ...require("./andvari/brand-webpack").brandPlugins(webpack),
     new MiniCssExtractPlugin({
       filename: "[name].css",
       chunkFilename: "chunk-[id].css",
