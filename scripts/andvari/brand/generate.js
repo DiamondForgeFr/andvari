@@ -65,20 +65,19 @@ function maskedMark(draw, id, attrs) {
   );
 }
 
-// Toolbar and app icons: the mark on a dark rounded tile, so it reads on light and dark toolbars.
+// Toolbar and app icons: the full mark, chest included, on a dark rounded tile, so it reads on
+// light and dark toolbars. The chest is what makes the dwarf a keeper (owner's choice, #17).
 const SIZES = [16, 19, 32, 38, 48, 96, 128];
 const LOCKED = [19, 38];
 
 function tile(size, { gray = false, locked = false } = {}) {
   const bg = gray ? GRAY_TILE : TILE;
   const fg = gray ? GRAY_MARK : GOLD;
-  const draw = size >= 96 ? scene : bust;
-  // Small icons use almost the whole tile; large ones keep a margin, as app icons do.
-  const inset = size >= 96 ? 7 : 3;
-  const scale = (64 - 2 * inset) / 64;
+  // Toolbar sizes use almost the whole tile; app icons keep a margin.
+  const [dx, dy, scale] = size >= 96 ? [5, 4, 0.86] : [2, 1, 0.94];
   let body =
     `<rect width="64" height="64" rx="14" fill="${bg}"/>` +
-    `<g transform="translate(${inset} ${inset}) scale(${scale})">${draw(fg, bg)}</g>`;
+    `<g transform="translate(${dx} ${dy}) scale(${scale})">${scene(fg, bg)}</g>`;
   if (locked) {
     // Padlock badge in the bottom-right corner, as upstream's locked icon.
     body +=

@@ -2,19 +2,19 @@
 
 The mark is "the keeper": a dwarf guard raising a small key, his chest behind him (decision on issue #3). `keychest.js` draws it on a 64 × 64 grid in two forms:
 
-- `scene`: the full mark, for 48 px and up;
-- `bust`: head, raised key and torso with thicker cuts, for 14 to 32 px.
+- `scene`: the full mark, for the toolbar and app icons (on their dark tile) and for 48 px and up elsewhere;
+- `bust`: head, raised key and torso with thicker cuts, for small marks without a tile (popup wordmark, inline autofill button, notification bar).
 
 `generate.js` turns it into every asset the extension ships, under `apps/browser/andvari/`:
 
-| Output                                  | Used for                                                                                                                        |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `images/icon<size>{,_gray,_locked}.png` | Toolbar and app icons (normal, logged out, locked). Same names as `apps/browser/src/images/`, which they overwrite in the build |
-| `images/andvari-mark.png`               | The mark on its own, transparent (about dialog)                                                                                 |
-| `popup-images/logo-{dark,white}@2x.png` | Wordmark bitmaps, same names as `apps/browser/src/popup/images/`                                                                |
-| `assets/andvari-logo.icon.js`           | Wordmark and 20 px tile as `BitSvg`, in place of `BitwardenLogo`, `BitwardenLogoBeta` and `BitwardenIcon`                       |
-| `assets/autofill-svg-icons.js`          | Inline menu button icons, in place of `logoIcon` and `logoLockedIcon`                                                           |
-| `assets/autofill-shield.js`             | Notification bar brand icon, in place of `Shield`                                                                               |
+| Output                                  | Used for                                                                                                                                                                            |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `images/icon<size>{,_gray,_locked}.png` | Toolbar and app icons (normal, logged out, locked): the full scene on a dark tile, at every size (#17). Same names as `apps/browser/src/images/`, which they overwrite in the build |
+| `images/andvari-mark.png`               | The mark on its own, transparent (about dialog)                                                                                                                                     |
+| `popup-images/logo-{dark,white}@2x.png` | Wordmark bitmaps, same names as `apps/browser/src/popup/images/`                                                                                                                    |
+| `assets/andvari-logo.icon.js`           | Wordmark and 20 px tile as `BitSvg`, in place of `BitwardenLogo`, `BitwardenLogoBeta` and `BitwardenIcon`                                                                           |
+| `assets/autofill-svg-icons.js`          | Inline menu button icons, in place of `logoIcon` and `logoLockedIcon`                                                                                                               |
+| `assets/autofill-shield.js`             | Notification bar brand icon, in place of `Shield`                                                                                                                                   |
 
 `apps/browser/andvari/brand-webpack.js` puts them in the build (`ANDVARI-PATCH #3` in `apps/browser/webpack.base.js`), and `scripts/andvari/check-brand.js` fails the build if any Bitwarden icon or logo is left.
 
