@@ -139,6 +139,12 @@ describe("Andvari brand overlay (FR-BRAND-02)", () => {
       expect(theme).toContain('@import "../../src/popup/scss/tailwind.css";');
     });
 
+    it("gives the lock screen Forge's tokens with a selector that outranks :root in light mode", () => {
+      const theme = fs.readFileSync(path.join(BROWSER, "andvari/theme/popup-theme.css"), "utf8");
+      expect(theme).toMatch(/\.theme_dark,\s*:root:has\(bit-lock\)\s*\{/);
+      expect(theme).not.toMatch(/(^|[\s,])html:has\(bit-lock\)\s*[,{]/m);
+    });
+
     it("declares one replacement per upstream brand module and the popup stylesheet", () => {
       expect(REPLACEMENTS).toHaveLength(5);
     });
