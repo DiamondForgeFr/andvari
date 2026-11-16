@@ -12,11 +12,13 @@
 //   assets/andvari-logo.icon.js             wordmark and icon modules (BitSvg)
 //   assets/autofill-svg-icons.js            inline menu button icons
 //   assets/autofill-shield.js               notification bar brand icon
+//   assets/andvari-lock.icon.js             lock screen page icon
+//   assets/portal-animated.js               animated mark for the unlock transition
 const fs = require("fs");
 const { createRequire } = require("module");
 const path = require("path");
 
-const { portal } = require("./portal");
+const { portal, animatedPortal } = require("./portal");
 
 const args = {};
 for (let i = 2; i < process.argv.length; i += 2) {
@@ -133,6 +135,13 @@ write(
   ) +
     `import { svg } from "../../../../libs/assets/src/svg/svg";\n\n` +
     `export const LockIcon = svg\`<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">${markImage("locked", 64)}</svg>\`;\n`,
+);
+
+// The animated mark for the lock screen and the unlock transition (#20).
+write(
+  "assets/portal-animated.js",
+  header("The animated rune portal, for apps/browser/andvari/portal/portal-transition.js (#20).") +
+    `export const PORTAL_SVG =\n  ${JSON.stringify(animatedPortal())};\n`,
 );
 
 // Inline menu button: open when the vault is unlocked, the closed portal when it is locked.

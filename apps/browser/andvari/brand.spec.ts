@@ -130,6 +130,15 @@ describe("Andvari brand overlay (FR-BRAND-02)", () => {
       ).toBe("../../src/autofill/utils/svg-icons.ts");
     });
 
+    it("sends the popup's styles entry to Andvari's, which loads it and the portal transition", () => {
+      expect(resolve("./scss", "apps/browser/src/popup/main.ts")).toBe(
+        path.join(BROWSER, "andvari/popup-entry.js"),
+      );
+      const entry = fs.readFileSync(path.join(BROWSER, "andvari/popup-entry.js"), "utf8");
+      expect(entry).toContain('import "../src/popup/scss";');
+      expect(entry).toContain('import "./portal/portal-transition";');
+    });
+
     it("sends the popup stylesheet to Andvari's themes, which load it unchanged", () => {
       expect(resolve("./tailwind.css", "apps/browser/src/popup/scss/index.ts")).toBe(
         path.join(BROWSER, "andvari/theme/popup-theme.css"),
@@ -146,7 +155,7 @@ describe("Andvari brand overlay (FR-BRAND-02)", () => {
     });
 
     it("declares one replacement per upstream brand module and the popup stylesheet", () => {
-      expect(REPLACEMENTS).toHaveLength(5);
+      expect(REPLACEMENTS).toHaveLength(6);
     });
   });
 });
