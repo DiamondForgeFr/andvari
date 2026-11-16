@@ -51,27 +51,27 @@
 /* Closing: the blades swing in first, then the cog comes back and turns home. */
 .andv-portal .andv-blade,
 .andv-portal .andv-iris {
-  transition: transform 0.8s cubic-bezier(0.6, 0, 0.4, 1);
+  transition: transform 0.55s cubic-bezier(0.6, 0, 0.4, 1);
 }
 
 .andv-portal .andv-cog {
-  transition: transform 0.7s cubic-bezier(0.5, 0, 0.3, 1) 0.6s;
+  transition: transform 0.5s cubic-bezier(0.5, 0, 0.3, 1) 0.4s;
 }
 
 /* Opening: the cog turns and sinks, the iris twists, the blades swing out. */
 .andv-portal.andv-open .andv-cog {
   transform: rotate(240deg) scale(0);
-  transition: transform 1.1s cubic-bezier(0.5, 0, 0.6, 1);
+  transition: transform 0.75s cubic-bezier(0.5, 0, 0.6, 1);
 }
 
 .andv-portal.andv-open .andv-iris {
   transform: rotate(-30deg);
-  transition: transform 1.3s cubic-bezier(0.6, 0, 0.4, 1) 0.2s;
+  transition: transform 0.9s cubic-bezier(0.6, 0, 0.4, 1) 0.1s;
 }
 
 .andv-portal.andv-open .andv-blade {
   transform: rotate(-72deg);
-  transition: transform 0.9s cubic-bezier(0.6, 0, 0.4, 1) 0.55s;
+  transition: transform 0.6s cubic-bezier(0.6, 0, 0.4, 1) 0.3s;
 }
 
 @keyframes andv-turn {
@@ -170,11 +170,11 @@ html.andv-gating app-root > * {
 }
 
 html.andv-gate-enter .andv-gate-zoom {
-  animation: andv-zoom-portal 0.9s linear both;
+  animation: andv-zoom-portal 0.65s linear both;
 }
 
 html.andv-gate-enter app-root > * {
-  animation: andv-zoom-page 0.9s linear both;
+  animation: andv-zoom-page 0.65s linear both;
 }
 
 html.andv-gate-enter .andv-gate .andv-portal .andv-pool {
@@ -182,7 +182,7 @@ html.andv-gate-enter .andv-gate .andv-portal .andv-pool {
 }
 
 html.andv-gate-enter .andv-gate-ink {
-  animation: andv-fade-out 0.9s ease-in both;
+  animation: andv-fade-out 0.65s ease-in both;
 }
 
 /* scale = ZOOM^(p - 1), p = (1 - cos(pi t)) / 2, ZOOM = 14 */
@@ -280,8 +280,8 @@ html.andv-leave app-root > * {
   transform: none;
   opacity: 1;
   transition:
-    transform 0.7s cubic-bezier(0.25, 0, 0.3, 1),
-    opacity 0.5s ease;
+    transform 0.5s cubic-bezier(0.25, 0, 0.3, 1),
+    opacity 0.35s ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
