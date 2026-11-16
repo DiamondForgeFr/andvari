@@ -10,9 +10,9 @@
 // Styles: ../theme/portal.css. With reduced motion, nothing plays.
 import { PORTAL_SVG } from "../assets/portal-animated";
 
-const IRIS_MS = 1250;
-const ENTER_MS = 900;
-const LEAVE_MS = 700;
+const IRIS_MS = 850;
+const ENTER_MS = 650;
+const LEAVE_MS = 500;
 // Share of the mark's width taken by the water's radius and the inner gold band's (on a 64 grid).
 const WATER = 17.6 / 64;
 const BAND = 19 / 64;
