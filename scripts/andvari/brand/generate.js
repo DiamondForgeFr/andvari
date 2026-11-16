@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /* eslint-disable no-console, @typescript-eslint/no-require-imports */
-// Generates Andvari's brand assets for the browser extension from the mark in keychest.js.
+// Generates Andvari's brand assets for the browser extension from the mark in portal.js.
 // See README.md in this folder for the tools it needs and how to run it.
 //
 //   node scripts/andvari/brand/generate.js --tools <dir> --font <SpaceGrotesk-Bold.ttf>
 //
 // Writes, under apps/browser/andvari/:
 //   images/icon<size>{,_gray,_locked}.png   toolbar and app icons, same names as upstream's
-//   images/andvari-mark.png                 the full mark, transparent, for in-page use
+//   images/andvari-mark.png                 the open mark, for in-page use
 //   popup-images/logo-{dark,white}@2x.png   wordmark bitmaps, same names as upstream's
 //   assets/andvari-logo.icon.js             wordmark and icon modules (BitSvg)
 //   assets/autofill-svg-icons.js            inline menu button icons
@@ -16,7 +16,7 @@ const fs = require("fs");
 const { createRequire } = require("module");
 const path = require("path");
 
-const { scene, bust } = require("./keychest");
+const { portal } = require("./portal");
 
 const args = {};
 for (let i = 2; i < process.argv.length; i += 2) {
@@ -35,14 +35,16 @@ const opentype = toolsRequire("opentype.js");
 const ROOT = path.resolve(__dirname, "../../..");
 const OUT = path.join(ROOT, "apps/browser/andvari");
 
-const GOLD = "#E3B341";
-const GOLD_LIGHT_THEME = "#B98316"; // deeper gold, legible on a white surface
-const TILE = "#111317";
-const GRAY_TILE = "#2A2D33";
-const GRAY_MARK = "#8B9099";
+// Logged out: the locked portal in greys.
+const GREY = { gold: "#8B9099", ink: "#1E2024" };
 
 const svgDoc = (w, h, body, viewBox = `0 0 ${w} ${h}`) =>
   `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="${viewBox}">${body}</svg>`;
+const markSvg = (state, colours) => svgDoc(64, 64, portal(state, colours));
+// The mark as an image inside another SVG: CSS of the page cannot reach into it (the popup
+// header recolours every <path> of its logo), and it carries no id that could clash.
+const markImage = (state, size, x = 0, y = 0) =>
+  `<image x="${x}" y="${y}" width="${size}" height="${size}" href="data:image/svg+xml;base64,${Buffer.from(markSvg(state)).toString("base64")}"/>`;
 
 function png(svg, width) {
   return new Resvg(svg, { fitTo: { mode: "width", value: width } }).render().asPng();
@@ -55,55 +57,22 @@ function write(rel, data) {
   console.log(`  ${path.relative(ROOT, file)}`);
 }
 
-// The mark with transparent cuts: gold shapes drawn white and cuts black inside a mask,
-// then one gold rectangle shown through it. It works on any background, and it is not a
-// <path>, so containers that recolour a logo's paths leave it gold.
-function maskedMark(draw, id, attrs) {
-  return (
-    `<mask id="${id}" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64">${draw("#FFFFFF", "#000000")}</mask>` +
-    `<rect width="64" height="64" mask="url(#${id})" ${attrs}/>`
-  );
-}
-
-// Toolbar and app icons: the full mark, chest included, on a dark rounded tile, so it reads on
-// light and dark toolbars. The chest is what makes the dwarf a keeper (owner's choice, #17).
+// Toolbar and app icons follow the vault's state: open when unlocked, the closed portal when
+// locked, and the closed portal in greys when logged out. No tile: the mark is its own disc.
 const SIZES = [16, 19, 32, 38, 48, 96, 128];
 const LOCKED = [19, 38];
 
-function tile(size, { gray = false, locked = false } = {}) {
-  const bg = gray ? GRAY_TILE : TILE;
-  const fg = gray ? GRAY_MARK : GOLD;
-  // Toolbar sizes use almost the whole tile; app icons keep a margin.
-  const [dx, dy, scale] = size >= 96 ? [5, 4, 0.86] : [2, 1, 0.94];
-  let body =
-    `<rect width="64" height="64" rx="14" fill="${bg}"/>` +
-    `<g transform="translate(${dx} ${dy}) scale(${scale})">${scene(fg, bg)}</g>`;
-  if (locked) {
-    // Padlock badge in the bottom-right corner, as upstream's locked icon.
-    body +=
-      `<path fill="none" stroke="${TILE}" stroke-width="9" d="M44 41 V36 A8 8 0 0 1 60 36 V41"/>` +
-      `<path fill="none" stroke="#ECE8E1" stroke-width="3.6" d="M44 41 V36 A8 8 0 0 1 60 36 V41"/>` +
-      `<rect x="37.5" y="39" width="29" height="27" rx="5" fill="${TILE}"/>` +
-      `<rect x="40" y="41.5" width="24" height="22" rx="3.5" fill="#ECE8E1"/>` +
-      `<path fill="${TILE}" d="M50.4 50.5 A2.6 2.6 0 1 1 53.6 50.5 L54.4 56 H49.6 Z"/>`;
-  }
-  return svgDoc(64, 64, body);
-}
-
 console.log("Icons");
 for (const size of SIZES) {
-  write(`images/icon${size}.png`, png(tile(size), size));
-  write(`images/icon${size}_gray.png`, png(tile(size, { gray: true }), size));
+  write(`images/icon${size}.png`, png(markSvg("open"), size));
+  write(`images/icon${size}_gray.png`, png(markSvg("locked", GREY), size));
   if (LOCKED.includes(size)) {
-    write(`images/icon${size}_locked.png`, png(tile(size, { locked: true }), size));
+    write(`images/icon${size}_locked.png`, png(markSvg("locked"), size));
   }
 }
-write(
-  "images/andvari-mark.png",
-  png(svgDoc(64, 64, maskedMark(scene, "m", `fill="${GOLD}"`)), 192),
-);
+write("images/andvari-mark.png", png(markSvg("open"), 192));
 
-// Wordmark: the bust, then "Andvari" in Space Grotesk Bold (SIL OFL 1.1) converted to paths.
+// Wordmark: the open mark, then "Andvari" in Space Grotesk Bold (SIL OFL 1.1) converted to paths.
 const font = opentype.parse(fs.readFileSync(args.font).buffer);
 const H = 45;
 const TEXT_X = 52;
@@ -116,29 +85,26 @@ if (textD.includes("NaN")) {
   throw new Error("The wordmark path contains NaN: use opentype.js 1.3.4 (see README.md).");
 }
 const W = Math.ceil(text.getBoundingBox().x2 + 1);
-const markScale = H / 64;
-const wordmarkMark = (id, attrs) =>
-  `<g transform="scale(${markScale})">${maskedMark(bust, id, attrs)}</g>`;
 
 console.log("Wordmark bitmaps");
 for (const [name, ink] of [
-  ["dark", TILE],
+  ["dark", "#111317"],
   ["white", "#FFFFFF"],
 ]) {
-  const body = wordmarkMark("m", `fill="${GOLD}"`) + `<path fill="${ink}" d="${textD}"/>`;
+  const body =
+    `<g transform="scale(${H / 64})">${portal("open")}</g>` + `<path fill="${ink}" d="${textD}"/>`;
   write(`popup-images/logo-${name}@2x.png`, png(svgDoc(W, H, body), Math.round((W * 86) / H)));
 }
 
 // BitSvg modules. The svg tag accepts no interpolation, so the markup is written out literally.
-const goldStyle = `<style>.andvari-gold{fill:${GOLD_LIGHT_THEME}}.theme_dark .andvari-gold{fill:${GOLD}}</style>`;
 const logoSvg =
-  `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><title>Andvari</title>${goldStyle}` +
-  wordmarkMark("andvari-logo-mark", `class="andvari-gold" fill="${GOLD}"`) +
+  `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><title>Andvari</title>` +
+  markImage("open", H) +
   `<path class="tw-fill-text-main" d="${textD}"/></svg>`;
 const iconSvg =
   `<svg width="20" height="20" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">` +
-  `<rect width="64" height="64" rx="12" fill="${TILE}"/>` +
-  `<g transform="translate(4 4) scale(0.875)">${bust(GOLD, TILE)}</g></svg>`;
+  markImage("open", 64) +
+  `</svg>`;
 
 const header = (what) =>
   `// Generated by scripts/andvari/brand/generate.js: do not edit by hand.\n// ${what}\n`;
@@ -149,7 +115,6 @@ write(
   header(
     "Replaces Bitwarden's logo and icon tile in the build (ANDVARI-PATCH #3, apps/browser/webpack.base.js).",
   ) +
-    "/* eslint-disable @bitwarden/components/require-theme-colors-in-svg -- Andvari's own brand mark: fixed brand gold, and mask luminance values that are never displayed */\n" +
     `import { svg } from "../../../../libs/assets/src/svg/svg";\n\n` +
     `export const AndvariLogo = svg\`${logoSvg}\`;\n\n` +
     `export const AndvariIcon = svg\`${iconSvg}\`;\n\n` +
@@ -159,17 +124,9 @@ write(
     "export const BitwardenIcon = AndvariIcon;\n",
 );
 
-// Inline menu button: 14 and 16 px icons sitting on the page's input, so the cuts stay transparent.
-const buttonMark = (id) => maskedMark(bust, id, `fill="${GOLD_LIGHT_THEME}"`);
-const logoIcon = svgDoc(14, 14, buttonMark("andvari-ib"), "0 0 64 64");
-const logoLockedIcon = svgDoc(
-  16,
-  16,
-  `<g transform="scale(0.8)">${buttonMark("andvari-ibl")}</g>` +
-    `<path fill="none" stroke="#5A5F68" stroke-width="4" d="M45 46 V41 A7 7 0 0 1 59 41 V46"/>` +
-    `<rect x="40" y="45" width="24" height="19" rx="3.5" fill="#5A5F68"/>`,
-  "0 0 64 64",
-);
+// Inline menu button: open when the vault is unlocked, the closed portal when it is locked.
+const logoIcon = svgDoc(14, 14, portal("open"), "0 0 64 64");
+const logoLockedIcon = svgDoc(16, 16, portal("locked"), "0 0 64 64");
 // The other icons are copied verbatim from upstream rather than imported: the content script
 // bundles are not minified, so importing the upstream module, even by name, would ship its
 // unused constants, Bitwarden's logo included. brand.spec.ts checks the copies stay identical.
@@ -190,18 +147,17 @@ write(
 );
 
 // Notification bar brand icon: same contract as src/autofill/content/components/icons/shield.ts.
+// The mark keeps its own colours, so the theme colour upstream passes in is not used.
 write(
   "assets/autofill-shield.js",
   header(
     "Replaces src/autofill/content/components/icons/shield.ts in the build (ANDVARI-PATCH #3): the Andvari mark instead of the shield.",
   ) +
     `import { html } from "lit";\n\n` +
-    `export function Shield({ ariaHidden = true, color }) {\n` +
-    `  const fill = color || "${GOLD}";\n` +
+    `export function Shield({ ariaHidden = true }) {\n` +
     "  return html`\n" +
     `    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" aria-hidden="\${ariaHidden}">\n` +
-    `      <mask id="andvari-nb" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64">${bust("#FFFFFF", "#000000")}</mask>\n` +
-    `      <rect width="64" height="64" mask="url(#andvari-nb)" fill="\${fill}" />\n` +
+    `      ${portal("open")}\n` +
     "    </svg>\n" +
     "  `;\n" +
     "}\n",
