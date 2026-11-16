@@ -11,10 +11,13 @@
 import { PORTAL_SVG } from "../assets/portal-animated";
 
 const IRIS_MS = 1250;
-const ENTER_MS = 950;
+const ENTER_MS = 900;
 const LEAVE_MS = 700;
-// Share of the mark's width taken by the water's radius (17.6 on a 64 grid).
+// Share of the mark's width taken by the water's radius and the inner gold band's (on a 64 grid).
 const WATER = 17.6 / 64;
+const BAND = 19 / 64;
+// How much the portal grows when we go through it; must match andv-zoom-portal in portal.css.
+const ZOOM = 14;
 
 let ids = 0;
 let lastHero = null;
@@ -51,8 +54,9 @@ function mountHero() {
   return box;
 }
 
+// The portal's own box: the hero's box is wider than the mark on some layouts.
 function rememberHero(box) {
-  const rect = box.getBoundingClientRect();
+  const rect = (box.querySelector(".andv-portal") ?? box).getBoundingClientRect();
   if (rect.width > 0) {
     lastHero = rect;
   }
@@ -70,16 +74,18 @@ async function enter(rect) {
   const gate = document.createElement("div");
   gate.className = "andv-gate";
   gate.setAttribute("aria-hidden", "true");
+  const ink = document.createElement("div");
+  ink.className = "andv-gate-ink";
+  const zoom = document.createElement("div");
+  zoom.className = "andv-gate-zoom";
   const portal = makePortal();
-  gate.appendChild(portal);
-  html.style.setProperty("--andv-x", `${rect.left}px`);
-  html.style.setProperty("--andv-y", `${rect.top}px`);
-  html.style.setProperty("--andv-size", `${rect.width}px`);
+  zoom.appendChild(portal);
+  gate.append(ink, zoom);
+  // See-through inside the water, solid ink under the inner gold band.
   html.style.setProperty("--andv-r0", `${rect.width * WATER}px`);
-  html.style.setProperty(
-    "--andv-r1",
-    `${Math.hypot(window.innerWidth, window.innerHeight) + rect.width}px`,
-  );
+  html.style.setProperty("--andv-r1", `${rect.width * BAND}px`);
+  html.style.setProperty("--andv-big", `${rect.width * ZOOM}px`);
+  html.style.setProperty("--andv-small", `${1 / ZOOM}`);
   setCentre(rect);
   document.body.appendChild(gate);
   html.classList.add("andv-gating");
@@ -89,13 +95,10 @@ async function enter(rect) {
     await nextFrame();
     portal.classList.add("andv-open");
     await wait(IRIS_MS);
-    html.classList.add("andv-gate-water");
-    await nextFrame();
-    await nextFrame();
     html.classList.add("andv-gate-enter");
     await wait(ENTER_MS + 50);
   } finally {
-    html.classList.remove("andv-gating", "andv-gate-water", "andv-gate-enter");
+    html.classList.remove("andv-gating", "andv-gate-enter");
     gate.remove();
     busy = false;
   }

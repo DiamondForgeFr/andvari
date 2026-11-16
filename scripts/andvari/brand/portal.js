@@ -20,6 +20,8 @@ const R_IN = 17.6;
 const f = (n) => +n.toFixed(2);
 const polar = (r, a, cx = C, cy = C) => [f(cx + Math.cos(a) * r), f(cy + Math.sin(a) * r)];
 const circle = (r, fill) => `<circle cx="${C}" cy="${C}" r="${r}" fill="${fill}"/>`;
+const ring = (r, width, stroke) =>
+  `<circle cx="${C}" cy="${C}" r="${r}" fill="none" stroke="${stroke}" stroke-width="${width}"/>`;
 
 // Rune strokes: generic drawn signs, not a copied alphabet (same strokes as the game's door).
 const RUNES = [
@@ -167,11 +169,12 @@ function animatedPortal({ gold = GOLD, ink = INK } = {}) {
   return (
     `<svg class="andv-portal" viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">` +
     `<defs><clipPath id="ANDV_ID"><circle cx="${C}" cy="${C}" r="${R_IN}"/></clipPath></defs>` +
-    circle(31, gold) +
-    circle(29, ink) +
+    // Rings, not stacked discs: the centre stays open, so the page shows through the water.
+    ring(30, 2, gold) +
+    ring(24.2, 9.6, ink) +
     `<g class="andv-runes">${runeBand(gold)}</g>` +
-    circle(19.4, gold) +
-    `<g clip-path="url(#ANDV_ID)">` +
+    ring(18.5, 1.8, gold) +
+    `<g class="andv-pool" clip-path="url(#ANDV_ID)">` +
     circle(R_IN, gold) +
     ripples.join("") +
     `<circle class="andv-drop" cx="${C}" cy="${C}" r="2.2" fill="${ink}"/>` +
