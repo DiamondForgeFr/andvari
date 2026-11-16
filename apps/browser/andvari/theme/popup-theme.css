@@ -66,9 +66,10 @@
 }
 
 /* Forge. The lock screen wears it in both themes, like the mark: in light mode the semantic
-   tokens upstream only redefines under .theme_dark are set here too. */
+   tokens upstream only redefines under .theme_dark are set here too. :root:has() outranks the
+   :root blocks above and upstream's (0,1,1 against 0,1,0); html:has() would lose to them. */
 .theme_dark,
-html:has(bit-lock) {
+:root:has(bit-lock) {
   color-scheme: dark;
   --color-fg-inactive: var(--color-gray-600);
   --color-fg-brand-soft: var(--color-brand-500);
