@@ -112,60 +112,161 @@
   display: none;
 }
 
+/* Upstream caps the hero's svg at 6rem; the portal fills its box, centred. */
+.andv-hero > .andv-portal {
+  max-width: none;
+  margin: 0 auto;
+}
+
 /*
- * The gate: an ink layer with the portal, under the page. The page (the vault, already rendered)
- * is clipped to the water's circle and starts small and far; entering, the portal grows past the
- * edges while the clip and the page grow with it. Same duration and curve, so the clip stays on
- * the water.
+ * The gate. Everything that moves is a transform or an opacity, so the compositor plays it.
+ *   - .andv-gate-ink: ink over the page, see-through at the water's centre, under the portal's
+ *     ring; it fades out as we go through.
+ *   - .andv-gate-zoom: the portal drawn at its final size (ZOOM times the hero) and shrunk to the
+ *     hero, so it stays sharp as it grows back past the popup's edges.
+ *   - the page (the vault, already rendered) comes from far behind, scaled from 0.35.
+ * Both zooms follow an exponential curve, eased at both ends: equal steps in apparent depth.
  */
 .andv-gate {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: 2147483000;
   pointer-events: none;
-  background: var(--color-gray-950);
+  overflow: hidden;
 }
 
-.andv-gate .andv-portal {
+.andv-gate-ink {
   position: absolute;
-  left: var(--andv-x);
-  top: var(--andv-y);
-  width: var(--andv-size);
-  transition: transform 0.95s cubic-bezier(0.62, 0, 0.25, 1);
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--andv-cx) var(--andv-cy),
+    transparent var(--andv-r0),
+    var(--color-gray-950, #0b0c0f) var(--andv-r1)
+  );
 }
 
-html.andv-gating app-root {
-  position: relative;
-  z-index: 1;
-  display: block;
-  clip-path: circle(0 at var(--andv-cx) var(--andv-cy));
+.andv-gate-zoom {
+  position: absolute;
+  left: calc(var(--andv-cx) - var(--andv-big) / 2);
+  top: calc(var(--andv-cy) - var(--andv-big) / 2);
+  width: var(--andv-big);
+  height: var(--andv-big);
+  transform: scale(var(--andv-small));
+  will-change: transform;
+}
+
+.andv-gate-zoom .andv-portal {
+  width: 100%;
+}
+
+.andv-gate .andv-portal .andv-pool {
+  transition: opacity 0.3s ease;
 }
 
 html.andv-gating app-root > * {
   transform-origin: var(--andv-cx) var(--andv-cy);
   transform: scale(0.35);
-  opacity: 0.15;
+  will-change: transform;
 }
 
-html.andv-gate-water app-root {
-  clip-path: circle(var(--andv-r0) at var(--andv-cx) var(--andv-cy));
-}
-
-html.andv-gate-enter app-root {
-  clip-path: circle(var(--andv-r1) at var(--andv-cx) var(--andv-cy));
-  transition: clip-path 0.95s cubic-bezier(0.62, 0, 0.25, 1);
+html.andv-gate-enter .andv-gate-zoom {
+  animation: andv-zoom-portal 0.9s linear both;
 }
 
 html.andv-gate-enter app-root > * {
-  transform: none;
-  opacity: 1;
-  transition:
-    transform 0.95s cubic-bezier(0.62, 0, 0.25, 1),
-    opacity 0.7s ease;
+  animation: andv-zoom-page 0.9s linear both;
 }
 
-html.andv-gate-enter .andv-gate .andv-portal {
-  transform: scale(11);
+html.andv-gate-enter .andv-gate .andv-portal .andv-pool {
+  opacity: 0;
+}
+
+html.andv-gate-enter .andv-gate-ink {
+  animation: andv-fade-out 0.9s ease-in both;
+}
+
+/* scale = ZOOM^(p - 1), p = (1 - cos(pi t)) / 2, ZOOM = 14 */
+@keyframes andv-zoom-portal {
+  0% {
+    transform: scale(0.0714);
+  }
+  10% {
+    transform: scale(0.0762);
+  }
+  20% {
+    transform: scale(0.0919);
+  }
+  30% {
+    transform: scale(0.1231);
+  }
+  40% {
+    transform: scale(0.1778);
+  }
+  50% {
+    transform: scale(0.2673);
+  }
+  60% {
+    transform: scale(0.4018);
+  }
+  70% {
+    transform: scale(0.5805);
+  }
+  80% {
+    transform: scale(0.7772);
+  }
+  90% {
+    transform: scale(0.9375);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* scale = 0.35^(1 - p), same p */
+@keyframes andv-zoom-page {
+  0% {
+    transform: scale(0.35);
+  }
+  10% {
+    transform: scale(0.3591);
+  }
+  20% {
+    transform: scale(0.3869);
+  }
+  30% {
+    transform: scale(0.4345);
+  }
+  40% {
+    transform: scale(0.503);
+  }
+  50% {
+    transform: scale(0.5916);
+  }
+  60% {
+    transform: scale(0.6958);
+  }
+  70% {
+    transform: scale(0.8054);
+  }
+  80% {
+    transform: scale(0.9046);
+  }
+  90% {
+    transform: scale(0.9746);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes andv-fade-out {
+  0%,
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 /* Locking: stepping back out of the portal onto the lock screen. */
