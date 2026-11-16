@@ -1,0 +1,192 @@
+/*
+ * The animated rune portal and the unlock transition (#20), driven by
+ * apps/browser/andvari/portal/portal-transition.js. CSS only: nothing runs once it has played.
+ */
+
+.andv-portal {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.andv-portal :is(.andv-runes, .andv-rp, .andv-drop, .andv-cog, .andv-iris) {
+  transform-box: view-box;
+  transform-origin: 32px 32px;
+}
+
+.andv-portal .andv-blade {
+  transform-box: view-box;
+}
+
+/* The rune band turns slowly, like the door in the site game. */
+.andv-portal .andv-runes {
+  animation: andv-turn 60s linear infinite;
+}
+
+/* Ripples leave the drop once the portal is open. */
+.andv-portal .andv-rp {
+  opacity: 0;
+}
+
+.andv-portal.andv-open .andv-rp {
+  animation: andv-ripple 4s linear infinite;
+}
+
+.andv-portal .andv-rp1 {
+  animation-delay: -1s;
+}
+
+.andv-portal .andv-rp2 {
+  animation-delay: -2s;
+}
+
+.andv-portal .andv-rp3 {
+  animation-delay: -3s;
+}
+
+.andv-portal.andv-open .andv-drop {
+  animation: andv-drop 4s ease-in-out infinite;
+}
+
+/* Closing: the blades swing in first, then the cog comes back and turns home. */
+.andv-portal .andv-blade,
+.andv-portal .andv-iris {
+  transition: transform 0.8s cubic-bezier(0.6, 0, 0.4, 1);
+}
+
+.andv-portal .andv-cog {
+  transition: transform 0.7s cubic-bezier(0.5, 0, 0.3, 1) 0.6s;
+}
+
+/* Opening: the cog turns and sinks, the iris twists, the blades swing out. */
+.andv-portal.andv-open .andv-cog {
+  transform: rotate(240deg) scale(0);
+  transition: transform 1.1s cubic-bezier(0.5, 0, 0.6, 1);
+}
+
+.andv-portal.andv-open .andv-iris {
+  transform: rotate(-30deg);
+  transition: transform 1.3s cubic-bezier(0.6, 0, 0.4, 1) 0.2s;
+}
+
+.andv-portal.andv-open .andv-blade {
+  transform: rotate(-72deg);
+  transition: transform 0.9s cubic-bezier(0.6, 0, 0.4, 1) 0.55s;
+}
+
+@keyframes andv-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes andv-ripple {
+  0% {
+    transform: scale(0.08);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes andv-drop {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  12% {
+    transform: scale(0.4);
+  }
+  30% {
+    transform: scale(1.1);
+  }
+}
+
+/* The lock screen's hero shows the animated portal in place of the static icon. */
+.andv-hero > bit-svg {
+  display: none;
+}
+
+/*
+ * The gate: an ink layer with the portal, under the page. The page (the vault, already rendered)
+ * is clipped to the water's circle and starts small and far; entering, the portal grows past the
+ * edges while the clip and the page grow with it. Same duration and curve, so the clip stays on
+ * the water.
+ */
+.andv-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--color-gray-950);
+}
+
+.andv-gate .andv-portal {
+  position: absolute;
+  left: var(--andv-x);
+  top: var(--andv-y);
+  width: var(--andv-size);
+  transition: transform 0.95s cubic-bezier(0.62, 0, 0.25, 1);
+}
+
+html.andv-gating app-root {
+  position: relative;
+  z-index: 1;
+  display: block;
+  clip-path: circle(0 at var(--andv-cx) var(--andv-cy));
+}
+
+html.andv-gating app-root > * {
+  transform-origin: var(--andv-cx) var(--andv-cy);
+  transform: scale(0.35);
+  opacity: 0.15;
+}
+
+html.andv-gate-water app-root {
+  clip-path: circle(var(--andv-r0) at var(--andv-cx) var(--andv-cy));
+}
+
+html.andv-gate-enter app-root {
+  clip-path: circle(var(--andv-r1) at var(--andv-cx) var(--andv-cy));
+  transition: clip-path 0.95s cubic-bezier(0.62, 0, 0.25, 1);
+}
+
+html.andv-gate-enter app-root > * {
+  transform: none;
+  opacity: 1;
+  transition:
+    transform 0.95s cubic-bezier(0.62, 0, 0.25, 1),
+    opacity 0.7s ease;
+}
+
+html.andv-gate-enter .andv-gate .andv-portal {
+  transform: scale(11);
+}
+
+/* Locking: stepping back out of the portal onto the lock screen. */
+html.andv-leaving app-root > * {
+  transform-origin: var(--andv-cx) var(--andv-cy);
+  transform: scale(3);
+  opacity: 0;
+}
+
+html.andv-leave app-root > * {
+  transform: none;
+  opacity: 1;
+  transition:
+    transform 0.7s cubic-bezier(0.25, 0, 0.3, 1),
+    opacity 0.5s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .andv-portal *,
+  .andv-gate * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

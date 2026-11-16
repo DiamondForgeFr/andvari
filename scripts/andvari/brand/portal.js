@@ -141,7 +141,47 @@ function portal(state = "open", { gold = GOLD, ink = INK } = {}) {
   return rim(gold, ink) + (state === "locked" ? iris(gold, ink) : water(gold, ink));
 }
 
-module.exports = { portal, GOLD, INK };
+// The animated mark (#20): the water lies under the iris, and CSS opens the iris when the svg
+// gets the class `andv-open`. Classes carry the `andv-` prefix; the clip id carries `ANDV_ID`,
+// which the page replaces so several copies can live together. Styles: theme/portal.css.
+function animatedPortal({ gold = GOLD, ink = INK } = {}) {
+  const ripples = [0, 1, 2, 3].map((i) =>
+    ripple(1, i, ink).replace("<path ", `<path class="andv-rp andv-rp${i}" `),
+  );
+  let blades = "";
+  const n = 6;
+  const pivot = R_IN + 0.6;
+  for (let i = 0; i < n; i++) {
+    const a0 = -Math.PI / 2 + (i * TAU) / n;
+    const a1 = a0 + TAU / n;
+    // Blades reach past the disc so their ends stay hidden by the clip while they swing out.
+    const [x0, y0] = polar(pivot * 1.25, a0);
+    const [x1, y1] = polar(pivot * 1.25, a1);
+    const [px, py] = polar(pivot, a0);
+    const [tx, ty] = polar(6.4, a0 + TAU / n / 2 + 1.15);
+    blades +=
+      `<path class="andv-blade" style="transform-origin:${px}px ${py}px" d="M${x0} ${y0}L${tx} ${ty}L${x1} ${y1}Z" ` +
+      `fill="${ink}" stroke="${gold}" stroke-width="1.1" stroke-linejoin="round"/>`;
+  }
+  const cog = iris(gold, ink).match(/<path fill-rule="evenodd"[^>]*\/>/)[0];
+  return (
+    `<svg class="andv-portal" viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">` +
+    `<defs><clipPath id="ANDV_ID"><circle cx="${C}" cy="${C}" r="${R_IN}"/></clipPath></defs>` +
+    circle(31, gold) +
+    circle(29, ink) +
+    `<g class="andv-runes">${runeBand(gold)}</g>` +
+    circle(19.4, gold) +
+    `<g clip-path="url(#ANDV_ID)">` +
+    circle(R_IN, gold) +
+    ripples.join("") +
+    `<circle class="andv-drop" cx="${C}" cy="${C}" r="2.2" fill="${ink}"/>` +
+    `<g class="andv-iris">${blades}</g>` +
+    `<g class="andv-cog">${cog}${circle(1.2, gold)}</g>` +
+    `</g></svg>`
+  );
+}
+
+module.exports = { portal, animatedPortal, GOLD, INK };
 
 if (require.main === module) {
   const [state = "open", gold, ink] = process.argv.slice(2);
