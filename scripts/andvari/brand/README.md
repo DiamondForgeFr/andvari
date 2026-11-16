@@ -18,6 +18,9 @@ The mark is "the rune portal" (owner's decision on issue #19, replacing "the kee
 | `assets/andvari-logo.icon.js`           | Wordmark and 20 px icon as `BitSvg`, in place of `BitwardenLogo`, `BitwardenLogoBeta` and `BitwardenIcon`                                                                                             |
 | `assets/autofill-svg-icons.js`          | Inline menu button icons (open and locked), in place of `logoIcon` and `logoLockedIcon`                                                                                                               |
 | `assets/autofill-shield.js`             | Notification bar brand icon, in place of `Shield`                                                                                                                                                     |
+| `assets/andvari-lock.icon.js`           | Lock screen page icon: the locked portal, in place of `LockIcon`                                                                                                                                      |
+
+The popup's colours (Forge in dark mode, Granit in light mode, #22) live in `apps/browser/andvari/theme/popup-theme.css`, which loads upstream's `tailwind.css` and redefines the palettes the semantic tokens are built from.
 
 `apps/browser/andvari/brand-webpack.js` puts them in the build (`ANDVARI-PATCH #3` in `apps/browser/webpack.base.js`), and `scripts/andvari/check-brand.js` fails the build if any Bitwarden icon or logo is left.
 

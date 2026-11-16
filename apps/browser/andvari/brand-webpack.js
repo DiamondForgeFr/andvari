@@ -26,6 +26,18 @@ const REPLACEMENTS = [
     from: path.join("apps", "browser", "src", "autofill", "content", "components", "icons"),
     to: path.join(ASSETS, "autofill-shield.js"),
   },
+  // #22: the lock screen's padlock illustration.
+  {
+    request: /^\.[\\/]lock\.icon$/,
+    from: path.join("libs", "assets", "src", "svg", "svgs"),
+    to: path.join(ASSETS, "andvari-lock.icon.js"),
+  },
+  // #22: the popup's stylesheet, loaded unchanged by Andvari's, which adds the Forge and Granit themes.
+  {
+    request: /^\.[\\/]tailwind\.css$/,
+    from: path.join("apps", "browser", "src", "popup", "scss"),
+    to: path.resolve(__dirname, "theme", "popup-theme.css"),
+  },
 ];
 
 /**

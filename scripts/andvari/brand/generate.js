@@ -124,6 +124,17 @@ write(
     "export const BitwardenIcon = AndvariIcon;\n",
 );
 
+// The page icon of the lock screen (#22): the locked portal in place of Bitwarden's padlock
+// illustration. Every page that shows LockIcon in the extension gets it.
+write(
+  "assets/andvari-lock.icon.js",
+  header(
+    "Replaces libs/assets/src/svg/svgs/lock.icon.ts in the build (#22): the locked portal instead of the padlock.",
+  ) +
+    `import { svg } from "../../../../libs/assets/src/svg/svg";\n\n` +
+    `export const LockIcon = svg\`<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">${markImage("locked", 64)}</svg>\`;\n`,
+);
+
 // Inline menu button: open when the vault is unlocked, the closed portal when it is locked.
 const logoIcon = svgDoc(14, 14, portal("open"), "0 0 64 64");
 const logoLockedIcon = svgDoc(16, 16, portal("locked"), "0 0 64 64");

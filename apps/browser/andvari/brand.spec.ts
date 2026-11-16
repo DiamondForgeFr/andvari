@@ -118,6 +118,7 @@ describe("Andvari brand overlay (FR-BRAND-02)", () => {
         "apps/browser/src/autofill/content/components/icons/brand-icon-container.ts",
         "autofill-shield.js",
       ],
+      ["./lock.icon", "libs/assets/src/svg/svgs/index.ts", "andvari-lock.icon.js"],
     ])("sends %s from %s to %s", (request, fromFile, target) => {
       expect(resolve(request, fromFile)).toBe(path.join(BROWSER, "andvari/assets", target));
     });
@@ -129,8 +130,17 @@ describe("Andvari brand overlay (FR-BRAND-02)", () => {
       ).toBe("../../src/autofill/utils/svg-icons.ts");
     });
 
-    it("declares one replacement per upstream brand module", () => {
-      expect(REPLACEMENTS).toHaveLength(3);
+    it("sends the popup stylesheet to Andvari's themes, which load it unchanged", () => {
+      expect(resolve("./tailwind.css", "apps/browser/src/popup/scss/index.ts")).toBe(
+        path.join(BROWSER, "andvari/theme/popup-theme.css"),
+      );
+      expect(resolve("./tailwind.css", "apps/web/src/main.ts")).toBe("./tailwind.css");
+      const theme = fs.readFileSync(path.join(BROWSER, "andvari/theme/popup-theme.css"), "utf8");
+      expect(theme).toContain('@import "../../src/popup/scss/tailwind.css";');
+    });
+
+    it("declares one replacement per upstream brand module and the popup stylesheet", () => {
+      expect(REPLACEMENTS).toHaveLength(5);
     });
   });
 });
