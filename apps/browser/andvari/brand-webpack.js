@@ -32,6 +32,12 @@ const REPLACEMENTS = [
     from: path.join("libs", "assets", "src", "svg", "svgs"),
     to: path.join(ASSETS, "andvari-lock.icon.js"),
   },
+  // #20: the popup's styles entry, loaded by Andvari's, which adds the portal transition.
+  {
+    request: /^\.[\\/]scss$/,
+    from: path.join("apps", "browser", "src", "popup"),
+    to: path.resolve(__dirname, "popup-entry.js"),
+  },
   // #22: the popup's stylesheet, loaded unchanged by Andvari's, which adds the Forge and Granit themes.
   {
     request: /^\.[\\/]tailwind\.css$/,
