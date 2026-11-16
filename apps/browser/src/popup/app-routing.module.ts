@@ -641,6 +641,8 @@ const routes: Routes = [
           },
           showReadonlyHostname: true,
           showAcctSwitcher: true,
+          // ANDVARI-PATCH #22: the unlock form sits on the page, under the portal, without a card.
+          hideCardWrapper: true,
           contentVerticalPadding: "compact",
           footerVerticalPadding: "compact",
           elevation: 1,

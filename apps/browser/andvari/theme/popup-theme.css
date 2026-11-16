@@ -1,0 +1,164 @@
+/*
+ * Andvari's popup themes (#22): Forge in dark mode, Granit in light mode.
+ *
+ * Replaces apps/browser/src/popup/scss/tailwind.css in the build (brand-webpack.js): it loads
+ * upstream's stylesheet unchanged, then redefines the palettes the component library builds its
+ * semantic tokens from. Components are not touched; they pick the new colours up through the
+ * tokens. Values chosen by the owner on the theme mockup, contrast checked against WCAG AA.
+ */
+@import "../../src/popup/scss/tailwind.css";
+
+:root {
+  /* Neutrals, shared by both themes: ink at the dark end, granite at the light end. */
+  --color-gray-050: #f2f3f5;
+  --color-gray-100: #e8eaee;
+  --color-gray-200: #d6d9df;
+  --color-gray-300: #bec2ca;
+  --color-gray-400: #9a9faa;
+  --color-gray-400-rgb: 154, 159, 170;
+  --color-gray-500: #6b717d;
+  --color-gray-600: #5e6470;
+  --color-gray-700: #2e333d;
+  --color-gray-700-rgb: 46, 51, 61;
+  --color-gray-800: #1a1d23;
+  --color-gray-800-rgb: 26, 29, 35;
+  --color-gray-900: #111317;
+  --color-gray-950: #0b0c0f;
+  --color-gray-950-rgb: 11, 12, 15;
+
+  /* Gold in place of Bitwarden's blue. 700 carries white text in light mode (5.3:1),
+     400 carries ink text in dark mode (9.6:1). */
+  --color-brand-050: #fbf6e7;
+  --color-brand-100: #f6ebc6;
+  --color-brand-200: #efdb97;
+  --color-brand-300: #e9c866;
+  --color-brand-400: #e3b341;
+  --color-brand-500: #c99a27;
+  --color-brand-600: #a9811a;
+  --color-brand-700: #8a6610;
+  --color-brand-700-rgb: 138, 102, 16;
+  --color-brand-800: #6e510c;
+  --color-brand-800-rgb: 110, 81, 12;
+  --color-brand-900: #4f3a09;
+  --color-brand-950: #2e2207;
+  --color-brand-950-rgb: 46, 34, 7;
+
+  /* Granit: the older tokens some popup components still read (RGB triplets). */
+  --color-background: 255 255 255;
+  --color-background-alt: 242 243 245;
+  --color-primary-100: 251 246 231;
+  --color-primary-300: 233 200 102;
+  --color-primary-600: 138 102 16;
+  --color-primary-700: 110 81 12;
+  --color-secondary-100: 232 234 238;
+  --color-secondary-300: 190 194 202;
+  --color-secondary-500: 107 113 125;
+  --color-secondary-600: 94 100 112;
+  --color-secondary-700: 46 51 61;
+  --color-text-main: 22 24 29;
+  --color-text-muted: 94 100 112;
+  --color-info-600: 138 102 16;
+  --color-hover-default: rgb(138 102 16 / 0.08);
+
+  --color-fg-heading: #16181d;
+  --color-fg-body: #16181d;
+  --color-fg-body-subtle: var(--color-gray-600);
+}
+
+/* Forge. The lock screen wears it in both themes, like the mark: in light mode the semantic
+   tokens upstream only redefines under .theme_dark are set here too. */
+.theme_dark,
+html:has(bit-lock) {
+  color-scheme: dark;
+  --color-fg-inactive: var(--color-gray-600);
+  --color-fg-brand-soft: var(--color-brand-500);
+  --color-fg-brand: var(--color-brand-400);
+  --color-fg-brand-strong: var(--color-brand-200);
+  --color-bg-brand-softer: var(--color-brand-950);
+  --color-bg-brand-soft: var(--color-brand-900);
+  --color-bg-brand-medium: var(--color-brand-800);
+  --color-bg-brand: var(--color-brand-400);
+  --color-bg-brand-strong: var(--color-brand-300);
+  --color-bg-brand-stronger: var(--color-brand-200);
+  --color-bg-hover: rgba(255, 255, 255, 0.05);
+  --color-border-muted: var(--color-gray-900);
+  --color-border-strong: var(--color-gray-500);
+  --color-border-stronger: var(--color-gray-400);
+  --color-border-buffer: var(--color-gray-950);
+  --color-border-brand-soft: var(--color-brand-800);
+  --color-border-brand: var(--color-brand-400);
+  --color-border-brand-strong: var(--color-brand-300);
+  --color-fg-danger: var(--color-red-400);
+  --color-border-danger: var(--color-red-400);
+
+  --color-background: 26 29 35;
+  --color-background-alt: 17 19 23;
+  --color-background-alt2: 35 39 48;
+  --color-background-alt3: 46 51 61;
+  --color-background-alt4: 11 12 15;
+  --color-primary-100: 46 34 7;
+  --color-primary-300: 110 81 12;
+  --color-primary-600: 227 179 65;
+  --color-primary-700: 239 219 151;
+  --color-secondary-100: 35 39 48;
+  --color-secondary-300: 46 51 61;
+  --color-secondary-500: 107 113 125;
+  --color-secondary-600: 154 159 170;
+  --color-secondary-700: 190 194 202;
+  --color-text-main: 236 231 218;
+  --color-text-muted: 154 159 170;
+  --color-text-contrast: 17 19 23;
+  --color-info-600: 227 179 65;
+  --color-hover-default: rgb(227 179 65 / 0.1);
+  --tw-ring-offset-color: #111317;
+
+  --color-fg-heading: #ece7da;
+  --color-fg-body: #ece7da;
+  --color-fg-body-subtle: var(--color-gray-400);
+  --color-fg-contrast: var(--color-gray-900);
+  --color-bg-primary: var(--color-gray-800);
+  --color-bg-secondary: var(--color-gray-900);
+  --color-bg-tertiary: var(--color-gray-950);
+  --color-bg-quaternary: #232730;
+  --color-border-base: var(--color-gray-700);
+  --color-border-light: #232730;
+  --color-border-focus: var(--color-brand-400);
+  --color-nav-bg-primary: var(--color-gray-800);
+  --color-nav-bg-secondary: var(--color-gray-800);
+}
+
+/* Lock screen (#22): ink ground, the locked portal large, no "or" line, log out as a quiet link. */
+html:has(bit-lock) body,
+html:has(bit-lock) popup-page,
+html:has(bit-lock) popup-header {
+  background-color: var(--color-gray-950);
+}
+
+html:has(bit-lock) bit-landing-hero .tw-size-20 {
+  width: 9rem;
+  height: 9rem;
+}
+
+html:has(bit-lock) bit-landing-hero svg {
+  max-width: none;
+}
+
+bit-lock form p.tw-text-center,
+bit-lock > div > p.tw-text-center {
+  display: none;
+}
+
+bit-lock form > div > button[type="button"]:last-child,
+bit-lock > div > button[type="button"]:last-child {
+  border-color: transparent;
+  background-color: transparent;
+  color: var(--color-fg-body-subtle);
+  font-weight: 400;
+}
+
+bit-lock form > div > button[type="button"]:last-child:hover,
+bit-lock > div > button[type="button"]:last-child:hover {
+  background-color: transparent;
+  color: var(--color-fg-heading);
+  text-decoration: underline;
+}
